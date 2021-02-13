@@ -32,6 +32,12 @@ class Employee extends Person
      */
     private $prenom;
 
+    /**
+     * @ORM\OneToOne(targetEntity=User::class, inversedBy="employee", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
 
     public function getNom(): ?string
     {
@@ -53,6 +59,18 @@ class Employee extends Person
     public function setPrenom(string $prenom): self
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
