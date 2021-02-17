@@ -41,6 +41,11 @@ class User implements UserInterface
      */
     private $employee;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $brochureFilename;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +140,18 @@ class User implements UserInterface
         }
 
         $this->employee = $employee;
+
+        return $this;
+    }
+
+    public function getBrochureFilename(): ?string
+    {
+        return $this->brochureFilename;
+    }
+
+    public function setBrochureFilename(string $brochureFilename): self
+    {
+        $this->brochureFilename = $brochureFilename;
 
         return $this;
     }

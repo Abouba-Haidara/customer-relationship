@@ -3,21 +3,24 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\FileUploader;
+use Symfony\Component\Mime\Email;
 use App\Form\RegistrationFormType;
 use App\Security\UserAuthenticator;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class RegistrationController extends AbstractController
 {
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, UserAuthenticator $authenticator): Response
+    public function register(Request $request, FileUploader $fileUploader, MailerInterface $mailer, UserPasswordEncoderInterface $passwordEncoder, GuardAuthenticatorHandler $guardHandler, UserAuthenticator $authenticator): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -32,10 +35,28 @@ class RegistrationController extends AbstractController
                 )
             );
 
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+         
+
+            $brochureFile = $form->get('brochure')->getData();
+            if ($brochureFile) {
+                $brochureFileName = $fileUploader->upload($brochureFile);
+                $user->setBrochureFilename($brochureFileName);
+            }  
+
+                $entityManager = $this->getDoctrine()->getManager();
+            
+                 $entityManager->persist($user);
+                $entityManager->flush();
+
             // do anything else you need here, like send an email
+             
+            // $email =  (new Email())
+            //         ->from($user->getEmail())
+            //         ->to("contact@sn.com")
+            //         ->subject("Sucessfull" )
+            //         ->html('<p>Votre inscription a été bien reçu</p>');
+            //         $mailer->send($email);
+
 
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $user,
